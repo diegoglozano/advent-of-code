@@ -14,14 +14,19 @@ with open(DATA_PATH / 'day_04.txt') as f:
 input_array = (
     np.array(input_array)
 )
-print(input_array)
+
 n_rows = input_array.shape[0]
 n_cols = input_array.shape[1]
 
 WORD = 'XMAS'
 PAD = 4
 total = 0
-padded_input_array = np.pad(input_array, ((PAD, PAD), (PAD, PAD)), 'constant', constant_values='.')
+padded_input_array = np.pad(
+    input_array,
+    ((PAD, PAD), (PAD, PAD)),
+    'constant',
+    constant_values='.',
+)
 for i in range(PAD, n_rows + PAD):
     for j in range(PAD, n_cols + PAD):
         if padded_input_array[i, j] == WORD[0]:

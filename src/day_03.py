@@ -59,6 +59,8 @@ print(
         .then(0)
         .otherwise(None)
         .forward_fill()
+        # Implicit do at the beginning
+        .fill_null(1)
         .alias('flag')
     )
     .filter(

@@ -106,15 +106,16 @@ print(
     .item()
 )
 
-incorrect_indexes = (
+incorrect_pages = (
     pages
     .join(
         correct_indexes,
         on='page_index',
         how='anti',
     )
+    ['pages']
+    .to_list()
 )
-incorrect_pages = incorrect_indexes['pages'].to_list()
 corrected_pages = []
 for page in incorrect_pages:
     subset_nodes = set(page)

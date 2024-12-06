@@ -1,11 +1,12 @@
 import polars as pl
+import networkx as nx
 
 from pathlib import Path
 
 pl.Config(fmt_table_cell_list_len=10)
 DATA_PATH = Path('data')
 
-with open(DATA_PATH / 'day_05_toy.txt') as f:
+with open(DATA_PATH / 'day_05.txt') as f:
     rules, pages = f.read().split('\n\n')
 
 rules = (
@@ -34,9 +35,6 @@ pages = (
     .with_row_index('page_index')
 )
 
-
-print(rules)
-print(pages)
 correct_indexes = (
     pages
     .join(
@@ -108,57 +106,69 @@ print(
     .item()
 )
 
-print(
+incorrect_indexes = (
     pages
     .join(
         correct_indexes,
         on='page_index',
         how='anti',
     )
-    .join(
-        rules,
-        how='cross',
-    )
-    .select(
-        'page_index',
-        'rule_index',
-        'pages',
-        'rules',
-    )
-    .explode('pages')
-    .with_columns(
-        pl
-        .int_range(pl.len())
-        .over('page_index', 'rule_index')
-        .alias('page_index_2')
-    )
-    .with_columns(
-        (pl.col('pages') == pl.col('rules').list.get(0))
-        .alias('match_1'),
-        (pl.col('pages') == pl.col('rules').list.get(1))
-        .alias('match_2'),
-    )
-        .filter(
-        pl.col('match_1') | pl.col('match_2')
-    )
-    .filter(
-        pl
-        .len()
-        .over('page_index', 'rule_index')
-        == 2
-    )
-    .group_by('page_index', 'rule_index', maintain_order=True)
-    .agg(
-        pl.col('pages'),
-        pl.col('rules').first(),
-        pl.col('match_1').first(),
-        pl.col('match_2').last(),
-    )
-    .with_columns(
-        (pl.col('match_1').not_() & pl.col('match_2').not_())
-        .alias('is_match')
-    )
-    .filter(
-        pl.col('is_match'),
-    )
 )
+incorrect_pages = incorrect_indexes['pages'].to_list()
+corrected_pages = []
+for page in incorrect_pages:
+    subset_nodes = set(page)
+    edges = (
+        rules
+        .explode('rules')
+        .with_row_index('rule_index_2')
+        .filter(
+            pl
+            .col('rules')
+            .is_in(subset_nodes)
+        )
+        .filter(
+            pl
+            .len()
+            .over('rule_index')
+            == 2
+        )
+        .group_by('rule_index')
+        .agg(
+            pl.col('rules').sort_by('rule_index_2'),
+        )
+        ['rules']
+        .to_list()
+    )
+    G = nx.DiGraph()
+    for src_node, dst_node in edges:
+        G.add_edge(src_node, dst_node)
+    sorted_rules = {
+        value: i
+        for i, value in enumerate(nx.topological_sort(G))
+    }
+    corrected_pages.append(
+        sorted(
+            page,
+            key=lambda x: sorted_rules.get(x, float('inf')),
+        )
+    )
+
+sorted_incorrect_pages = (
+    pl
+    .DataFrame({
+        'pages': corrected_pages,
+    })
+    .select(
+        pl
+        .col('pages')
+        .list.get(
+            pl.col('pages').list.len()
+            // 2
+        )
+    )
+    .sum()
+    .item()
+)
+
+print(sorted_incorrect_pages)

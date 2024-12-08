@@ -9,7 +9,7 @@ DATA_PATH = Path('data')
 POSSIBLE_OPERATORS = {
     '+': add,
     '*': mul,
-    '||': lambda x, y: int(f'{x}{y}'), # only for 2nd part
+    # '||': lambda x, y: int(f'{x}{y}'), # only for 2nd part
 }
 
 df = (
@@ -64,41 +64,6 @@ combinations = (
         .alias('index_combination'),
     )
 )
-# print(
-#     df
-#     .join(
-#         combinations,
-#         on='n_combinations',
-#         how='left',
-#     )
-#     .filter(
-#         pl.col('index_equation') == 1
-#     )
-#     .explode('combinations')
-#     .with_columns(
-#         pl
-#         .cum_count('index_combination')
-#         .over('index_equation', 'index_combination')
-#         .sub(1)
-#         .alias('index_operator'),
-#     )
-#     .rename({'combinations': 'operator'})
-#     .with_columns(
-#         pl
-#         .when(
-#             pl.col('operator') == '+'
-#         )
-#         .then(
-#             pl.col('equation').list.get(pl.col('index_operator'))
-#             + pl.col('equation').list.get(pl.col('index_operator') + 1)
-#         )
-#         .otherwise(
-#             pl.col('equation').list.get(pl.col('index_operator'))
-#             * pl.col('equation').list.get(pl.col('index_operator') + 1)
-#         )
-#         .alias('result')
-#     )
-# )
 
 operations = (
     df

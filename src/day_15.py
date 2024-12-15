@@ -47,7 +47,6 @@ print(f"Inital position: {i}, {j}")
 for movement in movements:
     time.sleep(0.01)
     table = get_rich_table(warehouse_map, style_dict=STYLE_DICT)
-    # console.clear()
     console.print(table)
 
     next_i = i

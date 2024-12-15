@@ -2,52 +2,59 @@ from pathlib import Path
 
 DATA_PATH = Path("data")
 
-with open(DATA_PATH / "day_10_toy.txt") as f:
+with open(DATA_PATH / "day_10.txt") as f:
     data = [list(map(int, line)) for line in f.read().splitlines()]
 
 
-def reach_hike(data, i, j, num_rows, num_cols, visited_nodes):
-    print(f"(i, j) = ({i}, {j})")
-    print(f"Value = {data[i][j]}")
-    if (i, j) in visited_nodes:
-        print("Already visited")
+def func(visited, data, i, j, previous_value, reachable):
+    if (i < 0) or (i >= len(data)) or (j < 0) or (j >= len(data[0])):
+        return
+    current_value = data[i][j]
+    if current_value != (previous_value + 1):
+        return
+    elif current_value == 9:
+        reachable.add((i, j))
+        return
+    elif (i, j) not in visited:
+        visited.add((i, j))
+        func(visited, data, i + 1, j, current_value, reachable)
+        func(visited, data, i - 1, j, current_value, reachable)
+        func(visited, data, i, j + 1, current_value, reachable)
+        func(visited, data, i, j - 1, current_value, reachable)
+
+
+def func_2(data, i, j, previous_value):
+    if (i < 0) or (i >= len(data)) or (j < 0) or (j >= len(data[0])):
         return 0
-    else:
-        visited_nodes.add((i, j))
-    if data[i][j] == 9:
+
+    current_value = data[i][j]
+    if current_value != (previous_value + 1):
+        return 0
+    if current_value == 9:
         return 1
-    if i > 0:
-        next_i = i - 1
-        if data[next_i][j] != data[i][j] + 1:
-            print("Reach first return 0")
-            return 0
-        reach_hike(data, i - 1, j, num_rows, num_cols, visited_nodes)
-    if i < num_rows - 1:
-        next_i = i + 1
-        if data[next_i][j] != data[i][j] + 1:
-            print("Reach second return 0")
-            return 0
-        reach_hike(data, i + 1, j, num_rows, num_cols, visited_nodes)
-    if j > 0:
-        next_j = j - 1
-        if data[i][next_j] != data[i][j] + 1:
-            print("Reach third return 0")
-            return 0
-        reach_hike(data, i, j - 1, num_rows, num_cols, visited_nodes)
-    if j < num_cols - 1:
-        next_j = j + 1
-        if data[i][next_j] != data[i][j] + 1:
-            print("Reach fourth return 0")
-            return 0
-        reach_hike(data, i, j + 1, num_rows, num_cols, visited_nodes)
+    else:
+        return (
+            +func_2(data, i + 1, j, current_value)
+            + func_2(data, i - 1, j, current_value)
+            + func_2(data, i, j + 1, current_value)
+            + func_2(data, i, j - 1, current_value)
+        )
 
 
-num_rows = len(data)
-num_cols = len(data[0])
-for i, line in enumerate(data):
-    for j, num in enumerate(line):
-        # is trailhead
-        if num == 0:
-            # acc = 0
-            visited_nodes = set()
-            test = reach_hike(data, i, j, num_rows, num_cols, visited_nodes)
+total = 0
+total_2 = 0
+for i in range(len(data)):
+    for j in range(len(data[0])):
+        if data[i][j] == 0:
+            # Part 1
+            visited = set()
+            reachable = set()
+            func(visited, data, i, j, -1, reachable)
+            total_reachable = len(reachable)
+            total += total_reachable
+
+            # Part 2
+            total_2 += func_2(data, i, j, -1)
+
+print(f"Total: {total}")
+print(f"Total_2: {total_2}")

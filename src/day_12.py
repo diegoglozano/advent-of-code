@@ -1,52 +1,44 @@
-import numpy as np
-
 from pathlib import Path
 
 
 DATA_PATH = Path("data")
 with open(DATA_PATH / "day_12_toy.txt", "r") as f:
-    data = np.array([list(row) for row in f.read().splitlines()])
-    data = np.pad(data, 1, "constant", constant_values=".")
+    data = [list(row) for row in f.read().splitlines()]
 
-print(data)
-
-
-def find_perimeter(data, i, j, perimeter, visited_nodes):
-    if (i, j) in visited_nodes:
-        return perimeter
-    visited_nodes.add((i, j))
-    current_value = data[i, j]
-    print("i: ", i)
-    print("j: ", j)
-    print("current_value: ", current_value)
-    if data[i + 1, j] != current_value and (i + 1, j) not in visited_nodes:
-        perimeter += 1
-    if data[i - 1, j] != current_value and (i - 1, j) not in visited_nodes:
-        perimeter += 1
-    if data[i, j + 1] != current_value and (i, j + 1) not in visited_nodes:
-        perimeter += 1
-    if data[i, j - 1] != current_value and (i, j - 1) not in visited_nodes:
-        perimeter += 1
-
-    if data[i + 1, j] == current_value:
-        perimeter += find_perimeter(data, i + 1, j, perimeter, visited_nodes)
-    if data[i - 1, j] == current_value:
-        perimeter += find_perimeter(data, i - 1, j, perimeter, visited_nodes)
-    if data[i, j + 1] == current_value:
-        perimeter += find_perimeter(data, i, j + 1, perimeter, visited_nodes)
-    if data[i, j - 1] == current_value:
-        perimeter += find_perimeter(data, i, j - 1, perimeter, visited_nodes)
-    return perimeter
+for line in data:
+    print(line)
 
 
-n_rows = data.shape[0]
-n_cols = data.shape[1]
+def func(data, i, j, previous_value, visited):
+    if (i < 0) or (i >= len(data)) or (j < 0) or (j >= len(data[0])):
+        return 1
 
-visited_nodes = set()
-for i in range(1, n_rows - 1):
-    for j in range(1, n_cols - 1):
-        visited_nodes = set()
-        perimeter = find_perimeter(data, i, j, 0, visited_nodes)
-        break
+    current_value = data[i][j]
+    if current_value != previous_value:
+        return 1
 
-print(perimeter)
+    if (i, j) in visited:
+        return 0
+    else:
+        visited.add((i, j))
+
+    return (
+        +func(data, i + 1, j, current_value, visited)
+        + func(data, i - 1, j, current_value, visited)
+        + func(data, i, j + 1, current_value, visited)
+        + func(data, i, j - 1, current_value, visited)
+    )
+
+
+global_visited = set()
+total = 0
+for i in range(len(data)):
+    for j in range(len(data[0])):
+        if (i, j) not in global_visited:
+            visited = set()
+            perimeter = func(data, i, j, data[i][j], visited)
+            area = len(visited)
+            price = area * perimeter
+            total += price
+            global_visited.update(visited)
+print(total)

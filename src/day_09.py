@@ -1,6 +1,7 @@
 import polars as pl
 
 from pathlib import Path
+from time import perf_counter
 
 
 # function to define if all dots in a list are at the end
@@ -11,8 +12,9 @@ def all_dots_at_end(lst):
 
 DATA_PATH = Path("data")
 
+start = perf_counter()
 df = pl.read_csv(
-    DATA_PATH / "day_09_toy.txt",
+    DATA_PATH / "day_09.txt",
     has_header=False,
     new_columns=["disk_map"],
     schema_overrides={
@@ -87,6 +89,8 @@ print(
     ]
     .sum()
 )
+end = perf_counter()
+print(f"Elapsed time: {end - start}")
 
 blocks = df_blocks["n"].to_list()
 flag_blocks = list(map(lambda x: x != ".", blocks))

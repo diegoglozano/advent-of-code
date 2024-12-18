@@ -97,7 +97,7 @@ class Computer:
         return ",".join(list(self.output))
 
 
-with open(DATA_PATH / "day_17_toy_2.txt") as f:
+with open(DATA_PATH / "day_17.txt") as f:
     data = f.read()
 
 a_register, b_register, c_register = [
@@ -113,6 +113,7 @@ print(f"Program: {program}")
 # Part 1
 computer = Computer(a_register, b_register, c_register, program)
 output = computer.run()
+print(f"Output: {output}")
 
 # Part 2
 output = ""
@@ -121,9 +122,5 @@ while output != ",".join([str(f) for f in program]):
     computer = Computer(a_register, b_register, c_register, program)
     output = computer.run()
     a_register += 1
-    # if a_register % 10_000 == 0:
-    #     print(f"Register A: {a_register}")
-    #     print(f"Output:   {output}")
-    #     print(f"Expected: {','.join([str(f) for f in program])}")
 
 print(f"Register A: {a_register - 1}")

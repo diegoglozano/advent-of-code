@@ -1,34 +1,68 @@
+import sys
 from pathlib import Path
-from itertools import cycle
+
+sys.setrecursionlimit(10**6)
 
 DATA_PATH = Path("data")
 
-with open(DATA_PATH / "day_16_toy_1.txt") as f:
+with open(DATA_PATH / "day_16_toy_2.txt") as f:
     data = [list(line) for line in f.read().splitlines()]
 
 for row in data:
     print(row)
 
-clockwise = cycle("^>v<")
-anticlockwise = cycle("^<v>")
-
 START = "S"
 END = "E"
+WALL = "#"
 
-for row in data:
-    if START in row:
-        i, j = (data.index(row), row.index(START))
-    if END in row:
-        target = (data.index(row), row.index(END))
+start_i, start_j = [
+    (i, j) for i, row in enumerate(data) for j, cell in enumerate(row) if cell == START
+][0]
+end_i, end_j = [
+    (i, j) for i, row in enumerate(data) for j, cell in enumerate(row) if cell == END
+][0]
 
-graph = {}
-for i in range(len(data)):
-    for j in range(len(row)):
-        if data[i][j] == "#":
-            continue
-        graph[(i, j)] = []
-        for direction in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            if data[i + direction[0]][j + direction[1]] != "#":
-                graph[(i, j)].append((i + direction[0], j + direction[1]))
 
-print(graph)
+def func(data, i, j, cost, direction, visited_nodes):
+    if data[i][j] == WALL:
+        return float("inf")
+    if data[i][j] == START:
+        return float("inf")
+    if data[i][j] == END:
+        return cost + 1
+    if (i, j) in visited_nodes:
+        return float("inf")
+    visited_nodes.add((i, j))
+
+    if direction == "^":
+        return min(
+            func(data, i - 1, j, cost + 1, "^", visited_nodes),
+            func(data, i, j + 1, cost + 1001, ">", visited_nodes),
+            func(data, i, j - 1, cost + 1001, "<", visited_nodes),
+        )
+    if direction == ">":
+        return min(
+            func(data, i, j + 1, cost + 1, ">", visited_nodes),
+            func(data, i - 1, j, cost + 1001, "^", visited_nodes),
+            func(data, i + 1, j, cost + 1001, "v", visited_nodes),
+        )
+    if direction == "<":
+        return min(
+            func(data, i, j - 1, cost + 1, "<", visited_nodes),
+            func(data, i + 1, j, cost + 1001, "v", visited_nodes),
+            func(data, i - 1, j, cost + 1001, "^", visited_nodes),
+        )
+    if direction == "v":
+        return min(
+            func(data, i + 1, j, cost + 1, "v", visited_nodes),
+            func(data, i, j - 1, cost + 1001, "<", visited_nodes),
+            func(data, i, j + 1, cost + 1001, ">", visited_nodes),
+        )
+
+
+cost_routes = []
+visited_nodes = set()
+costs = func(data, start_i - 1, start_j, 0, ">", visited_nodes)
+print(costs)
+
+# 416364 too high

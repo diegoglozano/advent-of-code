@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 DATA_PATH = Path("data")
-with open(DATA_PATH / "day_12_toy.txt", "r") as f:
+with open(DATA_PATH / "day_12.txt", "r") as f:
     data = [list(row) for row in f.read().splitlines()]
 
 for line in data:

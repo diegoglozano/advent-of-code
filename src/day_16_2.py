@@ -4,7 +4,7 @@ from heapq import heappop, heappush
 
 DATA_PATH = Path("data")
 
-with open(DATA_PATH / "day_16_toy_1.txt") as f:
+with open(DATA_PATH / "day_16.txt") as f:
     data = [list(line) for line in f.read().splitlines()]
 
 for row in data:

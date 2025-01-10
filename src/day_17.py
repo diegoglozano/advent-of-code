@@ -1,4 +1,5 @@
 import re
+import itertools as it
 
 from pathlib import Path
 
@@ -116,11 +117,11 @@ output = computer.run()
 print(f"Output: {output}")
 
 # Part 2
-output = ""
-a_register = 0
-while output != ",".join([str(f) for f in program]):
-    computer = Computer(a_register, b_register, c_register, program)
-    output = computer.run()
-    a_register += 1
+try_number = int("".join(reversed(list(map(str, program)))), 8) * 8
+print(Computer(try_number, b_register, c_register, program).run())
 
-print(f"Register A: {a_register - 1}")
+for _ in it.count():
+    result = Computer(try_number, b_register, c_register, program).run()
+    print(result)
+    try_number += 1
+# too low 130785035658000

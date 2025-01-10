@@ -1,4 +1,5 @@
 import polars as pl
+import polars.selectors as cs
 
 from pathlib import Path
 
@@ -49,12 +50,50 @@ print(sum(results.values()))
 
 
 results = {}
-data = [123]
 for number in data:
     results[str(number)] = []
     secret_number = SecretNumber(number)
-    for i in range(10):
+    for i in range(2_000):
         results[str(number)].append(int(str(secret_number.secret_number)[-1]))
         secret_number.evolve()
 
-print(pl.DataFrame(results).with_columns(pl.all().diff()))
+temp = (
+    pl.DataFrame(results)
+    .with_columns(pl.all().diff().name.suffix("_diff"))
+    .with_row_index()
+)
+
+N = 2024
+combinations = temp.rolling(
+    "index",
+    period="4i",
+).agg(cs.contains("_diff").name.suffix("_agg"))
+
+temp_combinations = temp.join(
+    combinations,
+    on="index",
+)
+sequences = (
+    temp_combinations.select(
+        cs.contains("_agg"),
+    )
+    .unpivot()["value"]
+    .unique()
+    .to_list()
+)
+max_sequence = 0
+for sequence in sequences:
+    total_sequence = 0
+    for number in data:
+        temp_result = temp_combinations.filter(
+            pl.col(f"{number}_diff_agg") == sequence
+        ).select(f"{number}")
+        if temp_result.is_empty():
+            temp_result = 0
+        else:
+            temp_result = temp_result.row(0, named=True)[f"{number}"]
+        total_sequence += temp_result
+    if total_sequence > max_sequence:
+        max_sequence = total_sequence
+
+print(max_sequence)

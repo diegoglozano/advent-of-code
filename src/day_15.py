@@ -36,7 +36,7 @@ STYLE_DICT = {
 console = Console()
 
 DATA_PATH = Path("data")
-with open(DATA_PATH / "day_15.txt", "r") as f:
+with open(DATA_PATH / "day_15_toy.txt", "r") as f:
     data = [list(row) for row in f.read().splitlines()]
     warehouse_map = data[:-2]
     movements = list(data[-1])

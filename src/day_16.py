@@ -5,7 +5,7 @@ sys.setrecursionlimit(10**6)
 
 DATA_PATH = Path("data")
 
-with open(DATA_PATH / "day_16_toy_2.txt") as f:
+with open(DATA_PATH / "day_16.txt") as f:
     data = [list(line) for line in f.read().splitlines()]
 
 for row in data:
